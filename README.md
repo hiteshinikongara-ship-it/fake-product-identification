@@ -28,7 +28,6 @@ This project addresses these issues by utilizing blockchain technology, where pr
 * Transparent and decentralized ledger.
 * Fake product detection mechanism.
 
-## Technologies Used
 
 ## Technologies Used
 
