@@ -30,15 +30,18 @@ This project addresses these issues by utilizing blockchain technology, where pr
 
 ## Technologies Used
 
-* Blockchain
-* Solidity
-* Truffle Framework
-* Ganache
-* MetaMask
-* Web3.js
-* HTML
-* CSS
-* JavaScript
+## Technologies Used
+
+- Blockchain Technology
+- Solidity- v0.8.19
+- Truffle Framework- v5.11.5
+- Ganache- v7.9.1
+- MetaMask Wallet
+- Web3.js- v1.10.0
+- Node.js- v18.20.8
+- HTML5
+- CSS3
+- JavaScript
 
 ## System Workflow
 
