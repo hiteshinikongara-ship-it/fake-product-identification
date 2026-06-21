@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Seller Login</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f2f2f2;
+            text-align: center;
+            padding-top: 60px;
+        }
+
+        .container {
+            background: white;
+            width: 350px;
+            margin: auto;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px gray;
+            }
+
+        input {
+            width: 90%;
+            padding: 10px;
+            margin: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: green;
+            color: white;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Seller Login</h2>
+
+<input type="text" id="sellerUser" placeholder="Username"><br>
+<input type="password" id="sellerPass" placeholder="Password"><br>
+
+<button onclick="sellerLogin()">Login</button>
+
+<hr>
+
+<h2>Put Product For Sale</h2>
+
+<input type="number" id="productId" placeholder="Product ID"><br>
+<input type="number" id="salePrice" placeholder="Sale Price"><br>
+
+<button onclick="putForSale()">Put For Sale</button>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+
+<script>
+const contractAddress = "0x701C7fDB950E59f8bcC4f2083570ada2aCFfBf3a";
+
+const abi = [
+ {
+   "inputs": [
+     {"internalType":"uint256","name":"_id","type":"uint256"},
+     {"internalType":"uint256","name":"_price","type":"uint256"}
+   ],
+   "name":"putForSale",
+   "outputs":[],
+   "stateMutability":"nonpayable",
+   "type":"function"
+ }
+];
+let web3;
+let contract;
+
+window.onload = async () => {
+    if(window.ethereum){
+        web3 = new Web3(window.ethereum);
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        contract = new web3.eth.Contract(abi, contractAddress);
+    }
+}
+
+function sellerLogin(){
+
+    const user = document.getElementById("sellerUser").value;
+    const pass = document.getElementById("sellerPass").value;
+
+    if(user === "seller" && pass === "1234"){
+        alert("Seller Login Successful");
+    } else {
+        alert("Invalid Login");
+    }
+}
+
+async function putForSale(){
+
+    const accounts = await web3.eth.getAccounts();
+
+    const productId = document.getElementById("productId").value;
+    const salePrice = document.getElementById("salePrice").value;
+
+    await contract.methods.putForSale(productId, salePrice)
+    .send({ from: accounts[0] });
+
+    alert("Product Listed For Sale");
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Gizmos Monitoring System</title>
+
+<!-- Web3 + QR + Scanner -->
+<script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f9;
+}
+
+header {
+    background: #007bff;
+    color: white;
+    padding: 15px;
+    text-align: center;
+    font-size: 22px;
+}
+
+.container {
+    background: white;
+    width: 380px;
+    margin: 40px auto;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.15);
+    text-align: center;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+hr {
+    margin: 15px 0;
+}
+
+#reader {
+    width: 100%;
+}
+.qr-box {
+    margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>Gizmos Monitoring System (Blockchain DApp)</header>
+
+<div class="container">
+
+    <button onclick="connectWallet()">Connect MetaMask</button>
+
+    <p id="status">Not Connected</p>
+
+    <hr>
+
+    <h3>Select Role</h3>
+    <select id="role" onchange="switchRole()">
+        <option value="">Select Role</option>
+        <option value="manufacturer">Manufacturer</option>
+        <option value="seller">Seller</option>
+        <option value="consumer">Consumer</option>
+    </select>
+
+    <!-- MANUFACTURER -->
+    <div id="manufacturerUI" style="display:none;">
+        <h3>Manufacturer</h3>
+
+        <input id="serial" placeholder="Serial Number">
+        <input id="name" placeholder="Product Name">
+
+        <select id="productName">
+            <option value="Mobile">Mobile</option>
+            <option value="Laptop">Laptop</option>
+            <option value="Smart TV">Smart TV</option>
+            <option value="Watch">Watch</option>
+            <option value="Headphones">Headphones</option>
+        </select>
+
+        <input id="brand" placeholder="Brand">
+        <input id="price" placeholder="Price (Wei)">
+
+        <button onclick="addProduct()">Add Product</button>
+    </div>
+
+    <!-- SELLER -->
+    <div id="sellerUI" style="display:none;">
+        <h3>Seller</h3>
+
+        <input id="productId" placeholder="Product ID">
+        <input id="sellPrice" placeholder="Sell Price (Wei)">
+
+        <button onclick="putForSale()">Put For Sale + Generate QR</button>
+
+        <div class="qr-box">
+            <div id="qrcode"></div>
+        </div>
+    </div>
+
+    <!-- CONSUMER -->
+    <div id="consumerUI" style="display:none;">
+        <h3>Consumer</h3>
+
+        <div id="reader"></div>
+
+        <p>Scanned Product ID: <b id="scanned"></b></p>
+
+        <input id="buyPrice" placeholder="Enter Price (Wei)">
+        <button onclick="buyProduct()">Buy Product</button>
+    </div>
+
+</div>
+
+<script>
+let web3, contract, account;
+let scannedId = "";
+
+// 🔥 IMPORTANT: Replace with YOUR deployed contract address
+const contractAddress = "0x701C7fDB950E59f8bcC4f2083570ada2aCFfBf3a";
+
+// ABI (MATCHES YOUR FIXED CONTRACT)
+const abi = [
+{
+ "inputs":[{"internalType":"string","name":"_serial","type":"string"},
+ {"internalType":"string","name":"_name","type":"string"},
+ {"internalType":"string","name":"_brand","type":"string"},
+ {"internalType":"uint256","name":"_price","type":"uint256"}],
+ "name":"addProduct",
+ "outputs":[],
+ "stateMutability":"nonpayable",
+ "type":"function"
+},
+{
+ "inputs":[{"internalType":"uint256","name":"_id","type":"uint256"},
+ {"internalType":"uint256","name":"_price","type":"uint256"}],
+ "name":"putForSale",
+ "outputs":[],
+ "stateMutability":"nonpayable",
+ "type":"function"
+},
+{
+ "inputs":[{"internalType":"uint256","name":"_id","type":"uint256"}],
+ "name":"buyProduct",
+ "outputs":[],
+ "stateMutability":"payable",
+ "type":"function"
+}
+];
+
+// ================= CONNECT WALLET =================
+async function connectWallet() {
+    if (!window.ethereum) {
+        alert("Install MetaMask");
+        return;
+    }
+
+    web3 = new Web3(window.ethereum);
+    await window.ethereum.request({ method: "eth_requestAccounts" });
+
+    const accs = await web3.eth.getAccounts();
+    account = accs[0];
+
+    contract = new web3.eth.Contract(abi, contractAddress);
+
+    document.getElementById("status").innerText =
+        "Connected: " + account;
+}
+
+// ================= ROLE SWITCH =================
+function switchRole() {
+    const role = document.getElementById("role").value;
+
+    document.getElementById("manufacturerUI").style.display =
+        role === "manufacturer" ? "block" : "none";
+
+    document.getElementById("sellerUI").style.display =
+        role === "seller" ? "block" : "none";
+
+    document.getElementById("consumerUI").style.display =
+        role === "consumer" ? "block" : "none";
+
+    if (role === "consumer") startScanner();
+}
+
+// ================= ADD PRODUCT =================
+async function addProduct() {
+    await contract.methods.addProduct(
+        serial.value,
+        productName.value,
+        brand.value,
+        price.value
+    ).send({ from: account });
+
+    alert("Product Added");
+}
+
+// ================= PUT FOR SALE =================
+async function putForSale() {
+    const id = productId.value;
+    const priceVal = sellPrice.value;
+
+    await contract.methods.putForSale(id, priceVal)
+        .send({ from: account });
+
+    const qrData = JSON.stringify({
+        productId: id,
+        contract: contractAddress
+    });
+
+    document.getElementById("qrcode").innerHTML = "";
+
+    new QRCode(document.getElementById("qrcode"), {
+        text: qrData,
+        width: 200,
+        height: 200
+    });
+
+    alert("Product Listed + QR Generated");
+}
+
+// ================= QR SCANNER =================
+function startScanner() {
+    const scanner = new Html5Qrcode("reader");
+
+    scanner.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 250 },
+        (qrText) => {
+            const data = JSON.parse(qrText);
+            scannedId = data.productId;
+
+            document.getElementById("scanned").innerText = scannedId;
+
+            scanner.stop();
+        }
+    );
+}
+
+// ================= BUY PRODUCT =================
+async function buyProduct() {
+    await contract.methods.buyProduct(scannedId)
+        .send({
+            from: account,
+            value: buyPrice.value
+        });
+
+    alert("Product Purchased Successfully");
+}
+</script>
+
+</body>
+</html>

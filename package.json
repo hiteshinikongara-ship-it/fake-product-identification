@@ -1,0 +1,15 @@
+{
+  "name": "gizmos-monitoring-system",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "lite-server"
+  },
+  "devDependencies": {
+    "lite-server": "^2.6.1"
+  },
+  "dependencies": {
+    "@truffle/contract": "^4.6.0",
+    "web3": "^1.10.0"
+  }
+}

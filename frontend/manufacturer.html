@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manufacturer Login</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f4f4;
+            text-align: center;
+            padding-top: 50px;
+        }
+
+        .container {
+            background: white;
+            width: 350px;
+            margin: auto;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px gray;
+        }
+        input, select {
+            width: 90%;
+            padding: 10px;
+            margin: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Manufacturer Login</h2>
+ <input type="text" id="username" placeholder="Username"><br>
+    <input type="password" id="password" placeholder="Password"><br>
+
+    <button onclick="login()">Login</button>
+
+    <hr>
+
+    <h2>Add Electronic Product</h2>
+
+    <input type="text" id="serial" placeholder="Serial Number"><br>
+
+    <select id="productName">
+        <option>Mobile</option>
+        <option>Laptop</option>
+        <option>Smart TV</option>
+        <option>Bluetooth Speaker</option>
+        <option>Smart Watch</option>
+        <option>Headphones</option>
+    </select><br>
+
+    <input type="text" id="brand" placeholder="Brand"><br>
+    <input type="number" id="price" placeholder="Price in Wei"><br>
+
+    <button onclick="addProduct()">Add Product</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+
+<script>
+const contractAddress = " 0x5d4557a0De7D0017CDBDFea14D84332A80D4cF7E";
+
+const abi = [
+ {
+   "inputs": [
+     {"internalType":"string","name":"_serial","type":"string"},
+     {"internalType":"string","name":"_name","type":"string"},
+     {"internalType":"string","name":"_brand","type":"string"},
+     {"internalType":"uint256","name":"_price","type":"uint256"}
+   ],
+   "name":"addProduct",
+   "outputs":[],
+   "stateMutability":"nonpayable",
+   "type":"function"
+ }
+];
+let web3;
+let contract;
+
+window.onload = async () => {
+    if(window.ethereum){
+        web3 = new Web3(window.ethereum);
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        contract = new web3.eth.Contract(abi, contractAddress);
+    }
+}
+
+function login(){
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    if(username === "manufacturer" && password === "1234"){
+        alert("Manufacturer Login Successful");
+    } else {
+        alert("Invalid Login");
+    }
+}
+async function addProduct(){
+
+    const accounts = await web3.eth.getAccounts();
+
+    const serial = document.getElementById("serial").value;
+    const name = document.getElementById("productName").value;
+    const brand = document.getElementById("brand").value;
+    const price = document.getElementById("price").value;
+
+    await contract.methods.addProduct(
+        serial,
+        name,
+        brand,
+        price
+    ).send({ from: accounts[0] });
+
+    alert("Electronic Product Added Successfully");
+}
+</script>
+
+</body>
+</html>
