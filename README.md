@@ -49,24 +49,28 @@ This project addresses these issues by utilizing blockchain technology, where pr
 ```bash
 truffle compile
 ```
+<img width="1917" height="1123" alt="truffle compile" src="https://github.com/user-attachments/assets/24545eae-174c-4303-a0ee-cd4e5001675a" />
 
 4. Deploy the smart contracts to Ganache using:
 
 ```bash
 truffle migrate
 ```
+<img width="1687" height="1078" alt="Deployed contracts" src="https://github.com/user-attachments/assets/0b2d1660-9a22-4623-8f3f-18596091e4e7" />
 
 5. Register products on the blockchain using:
 
 ```bash
 truffle exec scripts/fullFlow.js
 ```
+<img width="1919" height="1118" alt="adding products" src="https://github.com/user-attachments/assets/5e790ba7-b2df-4e2a-9137-b61f00ed6151" />
 
 6. Verify products using:
 
 ```bash
 truffle exec scripts/verifyProduct.js
 ```
+<img width="1899" height="1107" alt="verify product" src="https://github.com/user-attachments/assets/83bd8634-27ed-4a7e-b543-230dc9a64ec7" />
 
 7. Enter a product serial number:
 
